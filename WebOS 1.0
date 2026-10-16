@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>webOS-1 — My Content Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg" id="bg"></div>
+
+  <main class="ui">
+    <div class="my-content-card" aria-live="polite">
+      <h2 class="section-title">My Content</h2>
+      <div class="carousel" id="carousel" tabindex="0" role="listbox" aria-label="My content carousel">
+        <!-- Cards inserted by markup for simplicity -->
+        <div class="tile" role="option" aria-selected="true" data-title="Featured App" data-sub="Continue watching">
+          <div class="thumb" style="background-color:#3B82F6"></div>
+        </div>
+        <div class="tile" role="option" data-title="Photos" data-sub="Recent">
+          <div class="thumb" style="background:linear-gradient(45deg,#ef4444,#f97316)"></div>
+        </div>
+        <div class="tile" role="option" data-title="Movies" data-sub="New releases">
+          <div class="thumb" style="background:linear-gradient(45deg,#10b981,#06b6d4)"></div>
+        </div>
+        <div class="tile" role="option" data-title="Games" data-sub="Top picks">
+          <div class="thumb" style="background:linear-gradient(45deg,#a78bfa,#f472b6)"></div>
+        </div>
+        <div class="tile" role="option" data-title="Settings" data-sub="Preferences">
+          <div class="thumb" style="background:linear-gradient(45deg,#facc15,#fb7185)"></div>
+        </div>
+      </div>
+
+      <div class="focus-info" id="focusInfo" aria-hidden="false">
+        <div class="info-thumb" id="infoThumb"></div>
+        <div class="info-text">
+          <div class="info-title" id="infoTitle">Featured App</div>
+          <div class="info-sub" id="infoSub">Continue watching</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>:root{
+  --bg-blur: 12px;
+  --card-height: 140px;
+  --tile-width: 220px;
+  --gap: 18px;
+  --accent: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#fff}
+.bg{
+  position:fixed;inset:0;
+  background-image:url(''); /* Replace with your image path or set via JS */
+  background-size:cover;background-position:center;
+  filter:blur(var(--bg-blur)) brightness(.7);
+  transform:scale(1.03);
+  z-index:0;
+}
+.ui{position:relative;z-index:5;min-height:100%;display:flex;align-items:flex-end;justify-content:center;padding:48px}
+.my-content-card{
+  width:92%;max-width:1400px;
+  margin-bottom:36px;
+  backdrop-filter: blur(6px);
+  border-radius:12px;
+  padding:18px 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  display:flex;flex-direction:column;gap:14px;align-items:center;
+}
+.section-title{font-size:18px;margin:0 0 6px 6px;align-self:flex-start;opacity:.95}
+.carousel{
+  width:100%;
+  display:flex;gap:var(--gap);
+  padding:10px 6px;
+  align-items:end;
+  overflow:hidden;
+  position:relative;
+}
+.tile{
+  width:var(--tile-width);
+  height:var(--card-height);
+  border-radius:10px;
+  flex:0 0 auto;
+  transform-origin:center bottom;
+  transition: transform .25s cubic-bezier(.2,.9,.3,1), box-shadow .25s;
+  position:relative;
+  outline: none;
+  cursor: pointer;
+}
+.thumb{
+  position:absolute;inset:0;border-radius:10px;
+  box-shadow: inset 0 -20px 40px rgba(0,0,0,0.35);
+}
+.tile:not(.active){filter:grayscale(.05) contrast(.9);opacity:.9}
+.tile.active{
+  transform:translateY(-18px) scale(1.12);
+  box-shadow: 0 22px 36px rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.5);
+  z-index:10;
+}
+.focus-info{
+  width:100%;max-width:1000px;
+  margin-top:-18px;
+  display:flex;align-items:center;gap:14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25));
+  padding:12px;border-radius:10px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+}
+.info-thumb{width:96px;height:64px;border-radius:6px;background:#222;flex:0 0 auto;box-shadow:inset 0 -6px 14px rgba(0,0,0,0.6)}
+.info-text{display:flex;flex-direction:column}
+.info-title{font-weight:700;font-size:16px}
+.info-sub{font-size:13px;opacity:.8;margin-top:4px}
+
+/* Responsive / TV-large adjustments */
+@media (max-width:900px){
+  :root{--tile-width:160px;--card-height:110px}
+}
