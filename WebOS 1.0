@@ -274,7 +274,118 @@ WantedBy=multi-user.target[core]
 idle-time=0
 
 [shell]
-locking=false
+locking=falsefunction handleKeyEvent(key) {
+  if (key === 'ArrowLeft') focusLeft();
+  else if (key === 'ArrowRight') focusRight();
+  else if (key === 'Enter') activateFocused();
+  else if (key === 'Back') goBack();
+}
+
+window.addEventListener('keydown', (e) => handleKeyEvent(e.key));
+
+let pointerTimer;
+document.addEventListener('pointermove', (e) => {
+  // convert to element-under-pointer focus
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  setFocusToElement(el);
+});
+document.addEventListener('pointerdown', (e) => {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  activateElement(el);
+});#!/usr/bin/env python3
+# cec-to-uinput.py
+# Run as root. Listens to cec-client stdout and maps CEC codes to Linux key events via uinput.
+
+import subprocess
+import re
+import sys
+from evdev import UInput, ecodes as e
+
+# Configure mapping: CEC hex code (string) -> evdev key
+# You should run 'cec-client' in monitor mode to see which codes your TV sends and adjust mapping.
+CEC_TO_KEY = {
+    # Example mappings (common codes; verify on your TV):
+    "0x41": e.KEY_UP,
+    "0x42": e.KEY_DOWN,
+    "0x43": e.KEY_LEFT,
+    "0x44": e.KEY_RIGHT,
+    "0x09": e.KEY_ENTER,    # often 'select' or 'ok' - change if different
+    "0x0A": e.KEY_BACK,     # often 'back' / return
+    "0x44": e.KEY_PLAY,     # play (if needed)
+    # Add other codes you observe...
+}
+
+# Start cec-client in monitor mode (-m)
+proc = subprocess.Popen(['cec-client', '-m', '--monitor'] , stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+ui = UInput()  # default capabilities are fine for simple key events
+
+# pattern examples in cec-client output:
+# DEBUG:   >> key pressed: 0x41
+# DEBUG:   >> key released:
+pattern = re.compile(r'key (pressed|released):\s*(0x[0-9a-fA-F]+)?')
+
+print("CEC->uinput bridge starting... (press Ctrl-C to stop)", file=sys.stderr)
+try:
+    for line in proc.stdout:
+        line = line.strip()
+        m = pattern.search(line)
+        if not m:
+            continue
+        action = m.group(1)
+        code = m.group(2)
+        if not code:
+            continue
+        # lookup mapping
+        key = CEC_TO_KEY.get(code)
+        if not key:
+            # optionally log unrecognized codes
+            print("Unmapped CEC code:", code, file=sys.stderr)
+            continue
+        if action == 'pressed':
+            ui.write(e.EV_KEY, key, 1)
+            ui.syn()
+        elif action == 'released':
+            ui.write(e.EV_KEY, key, 0)
+            ui.syn()
+except KeyboardInterrupt:
+    print("Shutting down")
+finally:
+    proc.terminate()
+    ui.close()[Unit]
+Description=CEC to uinput bridge
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/bin/cec-to-uinput.py
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target// Keyboard (arrows + enter + back)
+window.addEventListener('keydown', (e) => {
+  // remote sends ArrowUp/ArrowDown/ArrowLeft/ArrowRight/Enter/Backspace/Exit depending on model
+  switch (e.key) {
+    case 'ArrowUp':     focusUp(); break;
+    case 'ArrowDown':   focusDown(); break;
+    case 'ArrowLeft':   focusLeft(); break;
+    case 'ArrowRight':  focusRight(); break;
+    case 'Enter':       activateFocused(); break;
+    case 'Backspace':
+    case 'Escape':
+    case 'Back':        goBack(); break;
+  }
+});
+
+// Pointer (air mouse) - update hover/focus with pointer coords
+document.addEventListener('pointermove', (e) => {
+  // e.clientX,e.clientY are available; map to your UI coordinate system
+  updatePointer(e.clientX, e.clientY);
+});
+document.addEventListener('pointerdown', (e) => {
+  // left click from remote -> activate element under pointer
+  handlePointerClick(e.clientX, e.clientY);
+});
 panel-position=none
 
 [launcher]
