@@ -257,4 +257,30 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helv
   });
 
   updateActive(0);
-})();
+})();[Unit]
+Description=Kiosk UI Launcher
+After=graphical.target network.target
+Wants=graphical.target
+
+[Service]
+User=root
+Environment=DISPLAY=:0
+ExecStart=/usr/local/bin/start-kiosk.sh
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target[core]
+idle-time=0
+
+[shell]
+locking=false
+panel-position=none
+
+[launcher]
+icon=/usr/share/pixmaps/chromium.png
+
+[output]
+name=HDMI-A-1
+mode=1920x1080@60
+transform=normal
