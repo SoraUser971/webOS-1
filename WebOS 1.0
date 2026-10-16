@@ -119,4 +119,142 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helv
 /* Responsive / TV-large adjustments */
 @media (max-width:900px){
   :root{--tile-width:160px;--card-height:110px}
-}
+}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>webOS-1 — TV Settings Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg" id="bg"></div>
+
+  <main class="ui">
+    <section class="settings-rail" aria-label="Settings">
+      <aside class="rail">
+        <div class="rail-inner">
+          <div class="rail-icon" aria-hidden="true">
+            <!-- settings gear icon -->
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 2.3 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 7.6a1.65 1.65 0 0 0-.33-1.82L4.2 5.7A2 2 0 1 1 7 2.87l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 10.4 2.6V2a2 2 0 0 1 4 0v.09c.2.07.4.18.57.31.43.34.97.44 1.48.28.1-.03.2-.06.3-.09l.06-.02A2 2 0 1 1 19.4 6.1l-.06.02c-.1.03-.2.06-.3.09-.5.16-1.05.06-1.48-.28a1.65 1.65 0 0 0-.57-.31V7.6a1.65 1.65 0 0 0 1 .82c.6.26 1.14.8 1.4 1.4.16.5.04 1.05-.28 1.48-.06.07-.12.14-.19.21z"></path>
+            </svg>
+          </div>
+
+          <div class="rail-label">Settings</div>
+        </div>
+      </aside>
+
+      <div class="content-area">
+        <div class="settings-grid">
+          <nav class="categories" id="categories" aria-label="Settings categories" tabindex="0">
+            <!-- category items inserted here -->
+            <button class="cat active" data-key="picture">Picture</button>
+            <button class="cat" data-key="sound">Sound</button>
+            <button class="cat" data-key="network">Network</button>
+            <button class="cat" data-key="inputs">Inputs</button>
+            <button class="cat" data-key="system">System</button>
+          </nav>
+
+          <section class="details" id="details" aria-live="polite">
+            <!-- details pane -->
+            <h2 id="detailTitle">Picture</h2>
+
+            <div id="detailContent">
+              <!-- Picture controls -->
+              <div class="control-row">
+                <label>Picture Mode</label>
+                <select class="control" data-path="picture.mode">
+                  <option>Standard</option>
+                  <option>Vivid</option>
+                  <option>Movie</option>
+                  <option>Game</option>
+                </select>
+              </div>
+
+              <div class="control-row">
+                <label>Brightness</label>
+                <input type="range" class="control" min="0" max="100" value="70" data-path="picture.brightness" />
+                <div class="control-value" data-path-display="picture.brightness">70</div>
+              </div>
+
+              <div class="control-row">
+                <label>Contrast</label>
+                <input type="range" class="control" min="0" max="100" value="60" data-path="picture.contrast" />
+                <div class="control-value" data-path-display="picture.contrast">60</div>
+              </div>
+
+              <div class="control-row toggle-row">
+                <label>Auto Power Saving</label>
+                <button class="toggle control" data-path="picture.powerSave" aria-pressed="false">Off</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>// Keyboard + click focus handling for the rail + carousel
+(function(){
+  const carousel = document.getElementById('carousel');
+  const tiles = Array.from(carousel.querySelectorAll('.tile'));
+  const infoThumb = document.getElementById('infoThumb');
+  const infoTitle = document.getElementById('infoTitle');
+  const infoSub = document.getElementById('infoSub');
+  const bg = document.getElementById('bg');
+
+  // Optionally set the background image:
+  // bg.style.backgroundImage = "url('assets/your-photo.jpg')";
+
+  let idx = 0;
+  function updateActive(newIdx){
+    idx = Math.max(0, Math.min(tiles.length-1, newIdx));
+    tiles.forEach((t,i)=>{
+      t.classList.toggle('active', i===idx);
+      t.setAttribute('aria-selected', i===idx ? 'true' : 'false');
+    });
+    const active = tiles[idx];
+    // Update info panel
+    infoTitle.textContent = active.dataset.title || '';
+    infoSub.textContent = active.dataset.sub || '';
+    const thumb = active.querySelector('.thumb');
+    infoThumb.style.background = getComputedStyle(thumb).background;
+    // center the active tile in carousel view
+    centerTileInView(active);
+  }
+
+  function centerTileInView(tile){
+    const container = carousel;
+    const containerRect = container.getBoundingClientRect();
+    const tileRect = tile.getBoundingClientRect();
+    const offset = (tileRect.left + tileRect.width/2) - (containerRect.left + containerRect.width/2);
+    container.scrollBy({left: offset, behavior:'smooth'});
+  }
+
+  // Set up events
+  tiles.forEach((t,i)=>{
+    t.addEventListener('click', ()=> updateActive(i));
+    t.addEventListener('focus', ()=> updateActive(i));
+    t.setAttribute('tabindex','0');
+  });
+
+  carousel.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowRight'){ e.preventDefault(); updateActive(idx+1); }
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); updateActive(idx-1); }
+    if(e.key === 'Enter'){ e.preventDefault(); /* perform activation */ alert('Activate: '+tiles[idx].dataset.title); }
+  });
+
+  // allow global arrow keys to control when focus is on body
+  window.addEventListener('keydown', (e)=>{
+    const rootFocus = (document.activeElement === document.body || document.activeElement === carousel);
+    if(!rootFocus) return;
+    if(e.key === 'ArrowRight'){ e.preventDefault(); carousel.focus(); updateActive(idx+1); }
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); carousel.focus(); updateActive(idx-1); }
+  });
+
+  updateActive(0);
+})();
