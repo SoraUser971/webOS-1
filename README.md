@@ -1,2 +1,1 @@
-# webOS-1
-Initial repository for webOS 1
+#lgwebos1 Webos is a tv os that was relased on 2014
